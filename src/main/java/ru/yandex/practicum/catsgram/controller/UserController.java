@@ -12,7 +12,6 @@ import java.util.Collection;
 public class UserController {
     private final UserService userService;
 
-    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -27,12 +26,12 @@ public class UserController {
         return userService.findUserByEmail(userEmail);
     }
     @PostMapping
-    public User create(@RequestBody User user) {
-        return userService.create(user);
+    public User createUser(@RequestBody User user) {
+        return userService.createUser(user);
     }
 
     @PutMapping
-    public User put(@RequestBody User user) {
-        return userService.put(user);
+    public User updateUser(@RequestBody User user) {
+        return userService.updateUser(user);
     }
 }

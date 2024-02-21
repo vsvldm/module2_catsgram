@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.catsgram.exception.PostNotFoundException;
 import ru.yandex.practicum.catsgram.exception.UserNotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
+import ru.yandex.practicum.catsgram.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -14,7 +16,7 @@ public class PostService {
     private final UserService userService;
     private final Map<Integer,Post> posts = new HashMap<>();
 
-    private int id = 0;
+    private static Integer globalId = 0;
 
     @Autowired
     public PostService(UserService userService) {
