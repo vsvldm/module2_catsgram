@@ -17,8 +17,14 @@ public class PostService {
         this.userService = userService;
     }
 
-    public Collection<Post> findAll() {
-        return posts.values();
+    public List<Post> findAll(Integer size, Integer from, String sort) {
+        return posts.values().stream().sorted((post1, post2) -> {
+           int comp =  post1.getCreationDate().compareTo(post2.getCreationDate());
+           if(sort.equals("desc")) {
+               comp = -1 * comp;
+           }
+           return comp;
+        }). skip(from).limit(size).collect(Collectors.toList());
     }
 
     public Post create(Post post) {
