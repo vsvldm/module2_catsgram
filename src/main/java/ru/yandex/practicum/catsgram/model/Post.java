@@ -6,13 +6,14 @@ public class Post {
 
     private Integer id;
     private final String author; // автор
-    private final Instant creationDate = Instant.now(); // дата создания
+    private final Instant creationDate; // дата создания
     private String description; // описание
     private String photoUrl; // url-адрес фотографии
 
     public Post(Integer id, String author, String description, String photoUrl) {
         this.id = id;
         this.author = author;
+        this.creationDate = Instant.now();
         this.description = description;
         this.photoUrl = photoUrl;
     }
