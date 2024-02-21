@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.yandex.practicum.catsgram.Constants.DESCENDING_ORDER;
+
 @Service
 public class PostService {
     private final UserService userService;
-    private final Map<Integer,Post> posts = new HashMap<>();
+    private final List<Post> posts = new ArrayList<>();
 
     private static Integer globalId = 0;
 
@@ -23,40 +25,51 @@ public class PostService {
         this.userService = userService;
     }
 
-    public List<Post> findAll(Integer size, Integer from, String sort) {
-        return posts.values().stream().sorted((post1, post2) -> {
-           int comp =  post1.getCreationDate().compareTo(post2.getCreationDate());
-           if(sort.equals("desc")) {
-               comp = -1 * comp;
-           }
-           return comp;
-        }). skip(from).limit(size).collect(Collectors.toList());
-    }
-
     public Post create(Post post) {
-        if (userService.findUserByEmail(post.getAuthor()) == null) {
-            throw new UserNotFoundException("Пользователь " + post.getAuthor() + " не найден");
+        User postAuthor = userService.findUserByEmail(post.getAuthor());
+        if (postAuthor == null) {
+            throw new UserNotFoundException(String.format(
+                    "Пользователь %s не найден",
+                    post.getAuthor()));
         }
 
-        posts.put(++id, post);
+        post.setId(getNextId());
+        posts.add(post);
         return post;
     }
 
     public Post findPostById(Integer postId) {
-        Post post = posts.get(postId);
-         if (post == null) {
-             throw new PostNotFoundException(String.format("Пост с id = %d не найден", postId));
-         }
-        return post;
+        return posts.stream()
+                .filter(p -> p.getId().equals(postId))
+                .findFirst()
+                .orElseThrow(() -> new PostNotFoundException(String.format("Пост № %d не найден", postId)));
+    }
+
+    public List<Post> findAll(Integer size, Integer from, String sort) {
+        return posts.stream()
+                .sorted((p0, p1) -> compare(p0, p1, sort))
+                .skip(from)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     public List<Post> findAllByUserEmail(String email, Integer size, String sort) {
-        return posts.values().stream().filter(post -> email.equals(post.getAuthor())).sorted((post1, post2) -> {
-            int comp = post1.getCreationDate().compareTo(post2.getCreationDate()); //прямой порядок сортировки
-            if(sort.equals("desc")){
-                comp = -1 * comp;
-            }
-            return comp;
-        }).limit(size).collect(Collectors.toList());
+        return posts.stream()
+                .filter(p -> email.equals(p.getAuthor()))
+                .sorted((p0, p1) -> compare(p0, p1, sort))
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    private static Integer getNextId() {
+        return globalId++;
+    }
+
+    private int compare(Post p0, Post p1, String sort) {
+        int result = p0.getCreationDate().compareTo(p1.getCreationDate()); //прямой порядок сортировки
+        if (sort.equals(DESCENDING_ORDER)) {
+            result = -1 * result; //обратный порядок сортировки
+        }
+        return result;
     }
 }
