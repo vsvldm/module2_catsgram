@@ -41,6 +41,10 @@ public class PostService {
     }
 
     public Post findPostById(Integer postId) {
-        return posts.get(postId);
+        Post post = posts.get(postId);
+         if (post == null) {
+             throw new PostNotFoundException(String.format("Пост с id = %d не найден", postId));
+         }
+        return post;
     }
 }
